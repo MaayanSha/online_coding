@@ -34,7 +34,7 @@ const updateCodeViaStream = asyncHandler(async(stream)=>{
 //defines the different events listeners
 const codeStream = (socket) => {
     //logger for succesfull connection
-    socket.on('connect', ()=>{
+    socket.on('connected', ()=>{
         console.log(`user connected, socket id: ${socket.id}`)
     })
     //when code block changes, the change is emitted to all clients

@@ -28,7 +28,8 @@ app.get('/', (req, res) => {
 
 //define socket event
 //io.on('connection', codeStream);
-io.on('connection', codeStream)
+io.on('connection', (stream)=>codeStream(stream))
+
 
 //connect to database
 mongoose.connection.once('open', ()=>{

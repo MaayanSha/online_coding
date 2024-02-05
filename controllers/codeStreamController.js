@@ -1,17 +1,31 @@
 const asyncHandler = require('express-async-handler');
+const { json } = require('express/lib/response');
 const Code = require('../models/Code')
 
+const connectedUsers = [];
+
 //controller handler for fetching all code blocks
-const getCode = asyncHandler(async(req, res)=>{
+const getAllCode = asyncHandler(async()=>{
     //find all code blocks currently stored in DB
     const codeSnippets = await Code.find().lean()
-    //if not found, return status 400(Not Found)
+    //if not found, return error
     if (!codeSnippets | codeSnippets.length == 0){
-        return res.status(400).json({message: 'no code blocks here yet'})
+        return {message: 'no code blocks here yet'}
     }
     //return JSON-formatted code blocks
-    res.json(codeSnippets)
+    return codeSnippets
     })
+
+const fetchBlock = asyncHandler(async(title)=>{
+    //find the requested code block
+    const codeBlock = await Code.findOne({title:title})
+    //in case something went wrong
+    if (!codeBlock){
+        return {message:"error fetching title"}
+    }
+    //if found, wrap in json and return
+    return codeBlock
+})
 
 
 //controller handler for updating code block in the database
@@ -22,10 +36,10 @@ const updateCodeViaStream = asyncHandler(async(stream)=>{
     })
     //return status according to result
     if (codeSnippet){
-        return res.status(200).json({message:'code block updated successfully'})
+        return {message:'code block updated successfully'}
     }
     else{
-        return res.status(500).json({message:'failed updating code block'})
+        return {message:'failed updating code block'}
     }
 })
 
@@ -34,8 +48,24 @@ const updateCodeViaStream = asyncHandler(async(stream)=>{
 //defines the different events listeners
 const codeStream = (socket) => {
     //logger for succesfull connection
-    socket.on('connected', ()=>{
-        console.log(`user connected, socket id: ${socket.id}`)
+    //emits the code from the DB
+    socket.on('connect', (socket)=>{
+    })
+    socket.on('get-mentor',()=>{
+        socket.emit('mentor-joined', connectedUsers[0])
+    })
+    socket.once('get-code-all',()=>{
+        connectedUsers.push(socket.id)
+        getAllCode().then((code)=>{
+            socket.emit('init-all-code', code)
+        })
+    })
+    socket.on('get-code-title', (title)=>{
+        const code = fetchBlock()
+        socket.emit('init-code', code)
+    })
+    socket.on('disconnect', user =>{
+        connectedUsers.filter((id)=>id!=user)
     })
     //when code block changes, the change is emitted to all clients
     socket.on('send-code-change', (stream)=>{
@@ -47,5 +77,4 @@ const codeStream = (socket) => {
         socket.emit('changes-saved', 'changes saved to DB')
     })
 }
-
 module.exports = codeStream;

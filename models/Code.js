@@ -13,7 +13,6 @@ const codeSchema = new mongoose.Schema({
         required: true,
     },
 },
-{ timestamps: true }
 )
 
 //export the Code model under the collection "codes"

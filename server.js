@@ -7,8 +7,8 @@ const server = http.createServer(app);
 const connectDB = require('./config/dbConn')
 const mongoose = require('mongoose')
 const PORT = process.env.PORT || 3500
-const getAllCode = require('./controllers/codeStreamController')
 const cors = require('cors');
+const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamController');
 
 
 app.use(cors());
@@ -36,7 +36,7 @@ const getAllConnections = async()=>{
 
 //define socket events
 //io.on('connection', codeStream);
-io.on('connection', (socket)=>{
+io.on('connection', (socket) =>{
   //get current users connected
   getAllConnections().then((users)=>{
     io.emit('sent-users', users)
@@ -49,11 +49,12 @@ io.on('connection', (socket)=>{
           socket.emit('init-all-code', code)
       })
   })
-  //get a specific code block
-  socket.on('get-code-title', (title)=>{
-      const code = fetchBlock(title).then((code)=> {
-          socket.emit('init-code', code)
-      })
+  socket.on('get-users', ()=>{
+    getAllConnections().then((users)=>{
+    io.emit('sent-users', users)
+     //get mentor
+    io.emit('mentor-joined', users[0])
+  })
   })
   //when code block changes, the change is emitted to all clients
   socket.on('send-code-change', (stream)=>{
@@ -66,9 +67,10 @@ io.on('connection', (socket)=>{
   })
 })
 
-
 //connect to database
 mongoose.connection.once('open', ()=>{
   console.log('Connected to DB');
   server.listen(PORT, ()=>console.log(`server running on port ${PORT}`))
 })
+
+module.exports = getAllConnections

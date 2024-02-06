@@ -15,20 +15,12 @@ const getAllCode = asyncHandler(async()=>{
     return codeSnippets
     })
 
-const fetchBlock = asyncHandler(async(title)=>{
-    //find the requested code block
-    const codeBlock = await Code.findOne({title:title})
-    //in case something went wrong
-    if (!codeBlock){
-        return {message:"error fetching title"}
-    }
-    //if found, wrap in json and return
-    return codeBlock
-})
-
 
 //controller handler for updating code block in the database
 const updateCodeViaStream = asyncHandler(async(stream)=>{
+    if(!stream){
+        return null
+    }
     //find code block according to title, then update code content
     const codeSnippet = await Code.findOneAndUpdate({title:stream.title}, {
         code:stream.code
@@ -42,8 +34,12 @@ const updateCodeViaStream = asyncHandler(async(stream)=>{
     }
 })
 
-const getAllConnections = asyncHandler(async()=>{
-    await io.fetchSockets().then((sockets)=>console.log(sockets))
-})
+  
 
-module.exports = getAllCode;
+
+
+      module.exports = {
+          getAllCode,
+        updateCodeViaStream,
+      }
+

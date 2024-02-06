@@ -2,7 +2,6 @@ const asyncHandler = require('express-async-handler');
 const { json } = require('express/lib/response');
 const Code = require('../models/Code')
 
-const connectedUsers = [];
 
 //controller handler for fetching all code blocks
 const getAllCode = asyncHandler(async()=>{
@@ -43,38 +42,8 @@ const updateCodeViaStream = asyncHandler(async(stream)=>{
     }
 })
 
+const getAllConnections = asyncHandler(async()=>{
+    await io.fetchSockets().then((sockets)=>console.log(sockets))
+})
 
-//callback function for the io.on connection middleware.
-//defines the different events listeners
-const codeStream = (socket) => {
-    //logger for succesfull connection
-    //emits the code from the DB
-    socket.on('connect', (socket)=>{
-    })
-    socket.on('get-mentor',()=>{
-        socket.emit('mentor-joined', connectedUsers[0])
-    })
-    socket.once('get-code-all',()=>{
-        connectedUsers.push(socket.id)
-        getAllCode().then((code)=>{
-            socket.emit('init-all-code', code)
-        })
-    })
-    socket.on('get-code-title', (title)=>{
-        const code = fetchBlock()
-        socket.emit('init-code', code)
-    })
-    socket.on('disconnect', user =>{
-        connectedUsers.filter((id)=>id!=user)
-    })
-    //when code block changes, the change is emitted to all clients
-    socket.on('send-code-change', (stream)=>{
-        socket.emit('code-changed', stream)
-    })
-    //when client chooses to save changes, new code is saved in DB and a message is broadcasted.
-    socket.on('save-code-block', (stream)=>{
-        updateCodeViaStream(stream)
-        socket.emit('changes-saved', 'changes saved to DB')
-    })
-}
-module.exports = codeStream;
+module.exports = getAllCode;

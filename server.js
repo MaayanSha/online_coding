@@ -4,6 +4,15 @@ const connectDB = require('./config/dbConn')
 const mongoose = require('mongoose')
 const cors = require('cors');
 const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamController');
+const PORT = process.env.PORT || 3000;
+
+//configure Database connection
+connectDB();
+
+//connect to database
+mongoose.connection.once('open', ()=>{
+  console.log('Connected to DB');
+})
 
 const express = require('express')
 const app = express()
@@ -72,15 +81,6 @@ io.on('connection', (socket) =>{
       updateCodeViaStream(stream)
       socket.emit('changes-saved', 'changes saved to DB')
   })
-})
-
-//configure Database connection
-connectDB();
-
-//connect to database
-mongoose.connection.once('open', ()=>{
-  console.log('Connected to DB');
-  server.listen(process.env.PORT || 3000);
 })
 
 

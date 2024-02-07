@@ -13,11 +13,7 @@ const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamContr
 
 app.use(cors());
 
-// const io = require('socket.io')(server, {
-//   cors: {
-//       origin: "http://localhost:3000"
-//   }
-// })
+const io = require('socket.io')(server)
 
 //configure Database connection
 connectDB();

@@ -6,18 +6,18 @@ const http = require('http');
 const server = http.createServer(app);
 const connectDB = require('./config/dbConn')
 const mongoose = require('mongoose')
-const PORT = process.env.PORT || 3500
+const PORT = process.env.PORT || 3000
 const cors = require('cors');
 const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamController');
 
 
 app.use(cors());
 
-const io = require('socket.io')(server, {
-  cors: {
-      origin: "http://localhost:3000"
-  }
-})
+// const io = require('socket.io')(server, {
+//   cors: {
+//       origin: "http://localhost:3000"
+//   }
+// })
 
 //configure Database connection
 connectDB();
@@ -85,7 +85,7 @@ io.on('connection', (socket) =>{
 //connect to database
 mongoose.connection.once('open', ()=>{
   console.log('Connected to DB');
-  server.listen(PORT, "0.0.0.0", ()=>console.log(`server running on port ${PORT}`))
+  server.listen(PORT, ()=>console.log(`server running on port ${PORT}`))
 })
 
 module.exports = getAllConnections

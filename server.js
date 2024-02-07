@@ -6,7 +6,7 @@ const http = require('http');
 const server = http.createServer(app);
 const connectDB = require('./config/dbConn')
 const mongoose = require('mongoose')
-const PORT = 3500
+const PORT = process.env.PORT || 3500
 const cors = require('cors');
 const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamController');
 

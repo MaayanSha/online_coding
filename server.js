@@ -47,8 +47,6 @@ io.on('connection', (socket) =>{
   //get current users connected
   getAllConnections().then((users)=>{
     io.emit('sent-users', users)
-     //get mentor
-    io.emit('mentor-joined', users[0])
   })
   //get all code blocks
   socket.once('get-code-all',()=>{

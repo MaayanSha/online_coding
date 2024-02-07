@@ -34,6 +34,13 @@ const getAllConnections = async()=>{
   return connections_id
 }
 
+//fetch all current connections to keep up to date with clients
+const getRoomConnections = async(room)=>{
+  const connections = await io.in(room).fetchSockets()
+  const connections_id = connections.map((conn)=> conn.id)
+  return connections_id
+}
+
 //define socket events
 //io.on('connection', codeStream);
 io.on('connection', (socket) =>{
@@ -49,12 +56,22 @@ io.on('connection', (socket) =>{
           socket.emit('init-all-code', code)
       })
   })
+  //when asked for users, return connected users and 
   socket.on('get-users', ()=>{
     getAllConnections().then((users)=>{
     io.emit('sent-users', users)
      //get mentor
     io.emit('mentor-joined', users[0])
   })
+  })
+  socket.on('add-nickname',(nickname)=>{
+    io.emit('sent-nicknames', nickname)
+  })
+  socket.on('join-room',(room)=>{
+    socket.join(room)
+    getRoomConnections(room).then((users)=>{
+      io.emit('user-joined-room',{users:users, room:room})
+    })
   })
   //when code block changes, the change is emitted to all clients
   socket.on('send-code-change', (stream)=>{

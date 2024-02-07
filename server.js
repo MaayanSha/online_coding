@@ -13,15 +13,23 @@ const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamContr
 
 app.use(cors());
 
-const io = require('socket.io')(server)
-
-//configure Database connection
-connectDB();
-
 //set up GET response
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname,"index.html"));
 });
+
+
+//configure Database connection
+connectDB();
+
+//connect to database
+mongoose.connection.once('open', ()=>{
+  console.log('Connected to DB');
+  server.listen(PORT, ()=>console.log(`server running on port ${PORT}`))
+})
+
+const io = require('socket.io')(server)
+
 
 //fetch all current connections to keep up to date with clients
 const getAllConnections = async()=>{
@@ -78,10 +86,5 @@ io.on('connection', (socket) =>{
   })
 })
 
-//connect to database
-mongoose.connection.once('open', ()=>{
-  console.log('Connected to DB');
-  server.listen(PORT, ()=>console.log(`server running on port ${PORT}`))
-})
 
 module.exports = getAllConnections

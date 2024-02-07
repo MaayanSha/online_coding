@@ -16,9 +16,12 @@ mongoose.connection.once('open', ()=>{
 
 const express = require('express')
 const app = express()
-const server = require('http').createServer(app)
-server.listen(PORT, () => console.log(`Listening on ${PORT}`));
-const io = require('socket.io')(server)
+const server = app.listen(PORT)
+//server.listen(PORT, () => console.log(`Listening on ${PORT}`));
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  }})
 
 app.use(cors());
 

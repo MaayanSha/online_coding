@@ -1,15 +1,14 @@
 require('dotenv').config()
 const path = require('path')
-const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
 const connectDB = require('./config/dbConn')
 const mongoose = require('mongoose')
-const PORT = process.env.PORT || 3000
 const cors = require('cors');
 const {getAllCode, updateCodeViaStream} = require('./controllers/codeStreamController');
 
+const express = require('express')
+const app = express()
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
 
 app.use(cors());
 
@@ -17,18 +16,6 @@ app.use(cors());
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname,"index.html"));
 });
-
-
-//configure Database connection
-connectDB();
-
-//connect to database
-mongoose.connection.once('open', ()=>{
-  console.log('Connected to DB');
-  server.listen(PORT, ()=>console.log(`server running on port ${PORT}`))
-})
-
-const io = require('socket.io')(server)
 
 
 //fetch all current connections to keep up to date with clients
@@ -84,6 +71,15 @@ io.on('connection', (socket) =>{
       updateCodeViaStream(stream)
       socket.emit('changes-saved', 'changes saved to DB')
   })
+})
+
+//configure Database connection
+connectDB();
+
+//connect to database
+mongoose.connection.once('open', ()=>{
+  console.log('Connected to DB');
+  server.listen(process.env.PORT || 3000);
 })
 
 
